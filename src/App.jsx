@@ -77,7 +77,7 @@ const App = () => {
           model: "gpt-4o-mini",
           messages: [{ role: 'user', content: prompt }],
         },
-      //  header
+        //  header
       );
 
       let structuredData = response.data.choices[0].message.content.trim();
@@ -89,7 +89,7 @@ const App = () => {
 
 
       const sheetsResponse = await axios.post(
-        'https://script.google.com/macros/xyz',
+        'https://script.google.com/macros/s/AKfycbxWHS5Mj0KTAyDxMAEHabHobqHqdNe4y1lGKj1ZwH1fs0qtyNe-5uBUxk71ja8QcBc/exec',
         new URLSearchParams(jsonResponse).toString(),
         {
           headers: {
