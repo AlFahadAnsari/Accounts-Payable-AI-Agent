@@ -121,7 +121,7 @@ const App = () => {
         return;
       }
       const sheetsResponse = await axios.post(
-        'https://script.google.com/macros/s/AKfycbxWHS5Mj0KTAyDxMAEHabHobqHqdNe4y1lGKj1ZwH1fs0qtyNe-5uBUxk71ja8QcBc/exec',
+        'zzzz',
         new URLSearchParams(jsonResponse).toString(),
         {
           headers: {
