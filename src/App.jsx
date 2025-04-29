@@ -90,13 +90,14 @@ const App = () => {
       "SGST": ""
     }
     Text: ${rawText}`;
-      const response = await axios.post(
-        'xyz',
-        {
-          model: "gpt-4o-mini",
-          messages: [{ role: 'user', content: prompt }],
-        },
-      );
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: "gpt-4o-mini",
+        messages: [{ role: 'user', content: prompt }],
+      },
+      //  header
+    );
 
       let structuredData = response.data.choices[0].message.content.trim();
       if (structuredData.startsWith("```json")) {
@@ -121,7 +122,7 @@ const App = () => {
         return;
       }
       const sheetsResponse = await axios.post(
-        'zzzz',
+        'https://script.google.com/macros/s/AKfycbxWHS5Mj0KTAyDxMAEHabHobqHqdNe4y1lGKj1ZwH1fs0qtyNe-5uBUxk71ja8QcBc/exec',
         new URLSearchParams(jsonResponse).toString(),
         {
           headers: {
