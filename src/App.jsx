@@ -96,12 +96,6 @@ const App = () => {
           model: "gpt-4o-mini",
           messages: [{ role: 'user', content: prompt }],
         },
-        {
-          headers: {
-            'Authorization': `Bearer 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`,
-            'Content-Type': 'application/json',
-          },
-        }
       );
 
       let structuredData = response.data.choices[0].message.content.trim();
