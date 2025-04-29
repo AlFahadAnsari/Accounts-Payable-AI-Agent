@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Tesseract from "tesseract.js";
 import { getDocument } from "pdfjs-dist";
@@ -7,8 +7,27 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const App = () => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset , formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
+  const [sheetData, setSheetData] = useState([]);
+
+    useEffect(() => {
+      const fetchSheetData = async () => {
+        try {
+          const response = await axios.get('https://script.google.com/macros/s/AKfycbxWHS5Mj0KTAyDxMAEHabHobqHqdNe4y1lGKj1ZwH1fs0qtyNe-5uBUxk71ja8QcBc/exec');
+          if (response.data.success) {
+            setSheetData(response.data.data || []);
+          } else {
+            throw new Error("Failed to fetch data");
+          }
+        } catch (error) {
+          toast.error(error.message || "Fetch error");
+        }
+      };
+      fetchSheetData();
+    }, []);
+
+    // console.log(sheetData)
 
   const handleFileUpload = async (data) => {
     const file = data.file[0];
@@ -49,11 +68,11 @@ const App = () => {
 
     await extractTextFromImage(imageUrl);
   };
-
+ 
   const extractTextFromImage = async (imageUrl) => {
     try {
       const result = await Tesseract.recognize(imageUrl, 'eng', {
-        logger: (m) => console.log(m),
+        // logger: (m) => console.log(m),
       });
       const rawText = result.data.text.trim();
       const prompt = `You are an AI assistant that extracts structured invoice data from the provided text. Analyse the provided text and only return JSON in this format:
@@ -77,7 +96,12 @@ const App = () => {
           model: "gpt-4o-mini",
           messages: [{ role: 'user', content: prompt }],
         },
-        //  header
+        {
+          headers: {
+            'Authorization': `Bearer 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`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
 
       let structuredData = response.data.choices[0].message.content.trim();
@@ -85,9 +109,23 @@ const App = () => {
         structuredData = structuredData.replace(/^```json\s*/, "").replace(/```$/, "").trim();
       }
 
-      const jsonResponse = JSON.parse(structuredData);
+      const jsonResponse = JSON.parse(structuredData); 
 
+      // console.log("fine")
+      
+      const exists = sheetData.some(
+        (item) =>
+          String(item.invoice_number || "").toLowerCase().trim() === 
+          String(jsonResponse.invoice_number || "").toLowerCase().trim()
+      );
+      
 
+      // console.log("ayaa ")
+      if (exists) {
+        console.log("ayaa yaha tak")
+        toast.error(`Invoice #${jsonResponse.invoice_number} already exists!`);
+        return;
+      }
       const sheetsResponse = await axios.post(
         'https://script.google.com/macros/s/AKfycbxWHS5Mj0KTAyDxMAEHabHobqHqdNe4y1lGKj1ZwH1fs0qtyNe-5uBUxk71ja8QcBc/exec',
         new URLSearchParams(jsonResponse).toString(),
